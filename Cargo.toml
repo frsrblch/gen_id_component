@@ -7,13 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-my_derives = { path = "C:/Users/Farseer/IdeaProjects/my_derives" }
-gen_id_allocator = { path = "C:/Users/Farseer/IdeaProjects/gen_id_allocator" }
-iter_context = { path = "C:/Users/Farseer/IdeaProjects/iter_context" }
+force_derive = { git = "https://github.com/frsrblch/force_derive" }
+gen_id_allocator = { git = "https://github.com/frsrblch/gen_id_allocator" }
+iter_context = { git = "https://github.com/frsrblch/iter_context" }
 ref-cast = "1"
 
 [dev-dependencies]
-gen_id_allocator = { path = "C:/Users/Farseer/IdeaProjects/gen_id_allocator", features = ['id_creation', 'assert_valid'] }
+gen_id_allocator = { git = "https://github.com/frsrblch/gen_id_allocator", features = ['id_creation', 'assert_valid'] }
 
 [[example]]
 name = "context_ops"
