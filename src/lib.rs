@@ -297,6 +297,7 @@ impl<'a, Arena, T> ContextualIterator for &'a mut Component<Arena, T> {
 impl<Arena, T> FromContextualIterator<T> for Component<Arena, T> {
     type Context = Arena;
 
+    #[inline]
     fn from_iter<Iter>(iter: Iter) -> Self
     where
         Iter: ContextualIterator<Context = Self::Context, Item = T>,
@@ -308,6 +309,7 @@ impl<Arena, T> FromContextualIterator<T> for Component<Arena, T> {
 impl<'a, Arena, T: 'a + Copy> FromContextualIterator<&'a T> for Component<Arena, T> {
     type Context = Arena;
 
+    #[inline]
     fn from_iter<Iter>(iter: Iter) -> Self
     where
         Iter: ContextualIterator<Context = Self::Context, Item = &'a T>,
