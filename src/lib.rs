@@ -1,13 +1,9 @@
+use force_derive::ForceDefault;
 use gen_id_allocator::{UntypedId, ValidId};
-use iter_context::{ContextualIterator, Iter, IterMut};
-use my_derives::MyDefault;
+use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
 use ref_cast::RefCast;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, Neg, Not};
-
-pub use from_iter::FromContextualIterator;
-
-mod from_iter;
 
 #[repr(transparent)]
 #[derive(Debug, RefCast)]
@@ -156,7 +152,7 @@ impl<T> IndexMut<&UntypedId> for UntypedComponent<T> {
 }
 
 #[repr(transparent)]
-#[derive(Debug, MyDefault, RefCast)]
+#[derive(Debug, ForceDefault, RefCast)]
 pub struct Component<Arena, T> {
     values: UntypedComponent<T>,
     marker: PhantomData<Arena>,
@@ -296,6 +292,28 @@ impl<'a, Arena, T> ContextualIterator for &'a Component<Arena, T> {
 
 impl<'a, Arena, T> ContextualIterator for &'a mut Component<Arena, T> {
     type Context = Arena;
+}
+
+impl<Arena, T> FromContextualIterator<T> for Component<Arena, T> {
+    type Context = Arena;
+
+    fn from_iter<Iter>(iter: Iter) -> Self
+    where
+        Iter: ContextualIterator<Context = Self::Context, Item = T>,
+    {
+        iter.into_iter().collect::<Vec<_>>().into()
+    }
+}
+
+impl<'a, Arena, T: 'a + Copy> FromContextualIterator<&'a T> for Component<Arena, T> {
+    type Context = Arena;
+
+    fn from_iter<Iter>(iter: Iter) -> Self
+    where
+        Iter: ContextualIterator<Context = Self::Context, Item = &'a T>,
+    {
+        iter.into_iter().copied().collect::<Vec<_>>().into()
+    }
 }
 
 macro_rules! impl_op_assign {
