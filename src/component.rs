@@ -1,6 +1,6 @@
 use crate::untyped_component::UntypedComponent;
 use force_derive::ForceDefault;
-use gen_id_allocator::{Id, Valid, ValidId};
+use gen_id_allocator::ValidId;
 use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
 use ref_cast::RefCast;
 use std::marker::PhantomData;
@@ -40,22 +40,26 @@ impl<Arena, T> From<Vec<T>> for Component<Arena, T> {
 
 impl<Arena, T> Component<Arena, T> {
     #[inline]
-    pub fn insert(&mut self, id: Valid<Id<Arena>>, value: T) {
+    pub fn insert<Id: ValidId<Arena = Arena>>(&mut self, id: Id, value: T) {
         self.values.insert_with(id.id().untyped, value, || panic!());
     }
 
     #[inline]
-    pub fn get(&self, id: Valid<Id<Arena>>) -> Option<&T> {
+    pub fn get<Id: ValidId<Arena = Arena>>(&self, id: Id) -> Option<&T> {
         self.values.get(id.id().untyped)
     }
 
     #[inline]
-    pub fn get_mut(&mut self, id: Valid<Id<Arena>>) -> Option<&mut T> {
+    pub fn get_mut<Id: ValidId<Arena = Arena>>(&mut self, id: Id) -> Option<&mut T> {
         self.values.get_mut(id.id().untyped)
     }
 
     #[inline]
-    pub fn swap<A: ValidId<Arena = Arena>, B: ValidId<Arena = Arena>>(&mut self, a: A, b: B) {
+    pub fn swap<IdA, IdB>(&mut self, a: IdA, b: IdB)
+    where
+        IdA: ValidId<Arena = Arena>,
+        IdB: ValidId<Arena = Arena>,
+    {
         self.values.swap(a.id().untyped, b.id().untyped);
     }
 
@@ -66,12 +70,12 @@ impl<Arena, T> Component<Arena, T> {
 
     #[inline]
     pub fn iter(&self) -> Iter<Arena, T> {
-        Iter::new(self.values.iter())
+        Iter::new(&self.values)
     }
 
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<Arena, T> {
-        IterMut::new(self.values.iter_mut())
+        IterMut::new(&mut self.values)
     }
 
     #[inline]
@@ -87,7 +91,7 @@ impl<Arena, T> Component<Arena, T> {
 
 impl<Arena, T> Component<Arena, Option<T>> {
     #[inline]
-    pub fn remove(&mut self, id: Valid<Id<Arena>>) -> Option<T> {
+    pub fn remove<Id: ValidId<Arena = Arena>>(&mut self, id: Id) -> Option<T> {
         let value = self.values.get_mut(id.id().untyped)?;
         std::mem::take(value)
     }
