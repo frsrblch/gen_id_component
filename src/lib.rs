@@ -1,3 +1,4 @@
+use crate::index_vec::IndexVec;
 use force_derive::ForceDefault;
 use gen_id_allocator::{UntypedId, ValidId};
 use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
@@ -5,10 +6,12 @@ use ref_cast::RefCast;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, Neg, Not};
 
+pub mod index_vec;
+
 #[repr(transparent)]
 #[derive(Debug, RefCast)]
 pub struct UntypedComponent<T> {
-    values: Vec<T>,
+    values: IndexVec<T>,
 }
 
 impl<T> Default for UntypedComponent<T> {
@@ -34,21 +37,17 @@ impl<T: Clone> Clone for UntypedComponent<T> {
     }
 }
 
-impl<T> UntypedComponent<T> {
+impl<T: Default> UntypedComponent<T> {
     #[inline]
     pub fn insert(&mut self, id: UntypedId, value: T) {
-        let index = id.index();
-        match self.values.get_mut(index) {
-            None => {
-                assert_eq!(
-                    index,
-                    self.values.len(),
-                    "UntypedComponent::insert: invalid index"
-                );
-                self.values.push(value);
-            }
-            Some(current) => *current = value,
-        }
+        self.insert_with(id, value, Default::default);
+    }
+}
+
+impl<T> UntypedComponent<T> {
+    #[inline]
+    pub fn insert_with<F: Fn() -> T>(&mut self, id: UntypedId, value: T, fill: F) {
+        self.values.insert_with(id.index(), value, fill);
     }
 
     #[inline]
@@ -95,7 +94,15 @@ impl<T> UntypedComponent<T> {
 impl<T> From<Vec<T>> for UntypedComponent<T> {
     #[inline]
     fn from(values: Vec<T>) -> Self {
-        UntypedComponent { values }
+        UntypedComponent {
+            values: values.into(),
+        }
+    }
+}
+
+impl<T> From<UntypedComponent<T>> for Vec<T> {
+    fn from(component: UntypedComponent<T>) -> Self {
+        component.values.into()
     }
 }
 
@@ -186,7 +193,7 @@ impl<Arena, T> From<Vec<T>> for Component<Arena, T> {
 impl<Arena, T> Component<Arena, T> {
     #[inline]
     pub fn insert(&mut self, id: impl ValidId<Arena = Arena>, value: T) {
-        self.values.insert(id.id().untyped, value);
+        self.values.insert_with(id.id().untyped, value, || panic!());
     }
 
     #[inline]
@@ -480,7 +487,7 @@ mod test {
 
         target.assign((&primes + &ints) * &primes);
 
-        assert_eq!(target.values.values, vec![6, 15, 40]);
+        assert_eq!(Vec::from(target.values), vec![6, 15, 40]);
     }
 
     #[test]
