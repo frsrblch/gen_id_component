@@ -10,7 +10,7 @@ use std::ops::{Index, IndexMut, Neg, Not};
 #[derive(Debug, ForceDefault, RefCast)]
 pub struct Component<Arena, T> {
     values: UntypedComponent<T>,
-    marker: PhantomData<Arena>,
+    marker: PhantomData<*const Arena>,
 }
 
 impl<Arena, T: Clone> Clone for Component<Arena, T> {
