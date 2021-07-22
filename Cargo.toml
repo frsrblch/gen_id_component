@@ -14,6 +14,3 @@ ref-cast = "1"
 
 [dev-dependencies]
 gen_id_allocator = { git = "https://github.com/frsrblch/gen_id_allocator", features = ['id_creation', 'assert_valid'] }
-
-[[example]]
-name = "context_ops"
