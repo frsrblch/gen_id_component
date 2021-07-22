@@ -1,19 +1,22 @@
 use force_derive::ForceDefault;
+use ref_cast::RefCast;
 use std::ops::{Index, IndexMut};
 
 #[repr(transparent)]
-#[derive(Debug, ForceDefault)]
+#[derive(Debug, ForceDefault, RefCast)]
 pub struct IndexVec<T> {
     values: Vec<T>,
 }
 
 impl<T: Clone> Clone for IndexVec<T> {
+    #[inline]
     fn clone(&self) -> Self {
         Self {
             values: self.values.clone(),
         }
     }
 
+    #[inline]
     fn clone_from(&mut self, source: &Self) {
         self.values.clone_from(&source.values);
     }
@@ -90,24 +93,28 @@ impl<T: Default> IndexVec<T> {
 impl<T> Index<usize> for IndexVec<T> {
     type Output = T;
 
+    #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         self.values.index(index)
     }
 }
 
 impl<T> IndexMut<usize> for IndexVec<T> {
+    #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.values.index_mut(index)
     }
 }
 
 impl<T> From<Vec<T>> for IndexVec<T> {
+    #[inline]
     fn from(values: Vec<T>) -> Self {
         Self { values }
     }
 }
 
 impl<T> From<IndexVec<T>> for Vec<T> {
+    #[inline]
     fn from(values: IndexVec<T>) -> Self {
         values.values
     }
