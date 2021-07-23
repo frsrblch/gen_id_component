@@ -1,16 +1,14 @@
-use crate::untyped_component::UntypedComponent;
+use crate::raw_component::RawComponent;
 use force_derive::ForceDefault;
 use gen_id_allocator::ValidId;
 use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
 use ref_cast::RefCast;
-use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, Neg, Not};
 
 #[repr(transparent)]
 #[derive(Debug, ForceDefault, RefCast)]
 pub struct Component<Arena, T> {
-    values: UntypedComponent<T>,
-    marker: PhantomData<*const Arena>,
+    values: RawComponent<Arena, T>,
 }
 
 impl<Arena, T: Clone> Clone for Component<Arena, T> {
@@ -18,7 +16,6 @@ impl<Arena, T: Clone> Clone for Component<Arena, T> {
     fn clone(&self) -> Self {
         Self {
             values: self.values.clone(),
-            marker: PhantomData,
         }
     }
 
@@ -33,7 +30,6 @@ impl<Arena, T> From<Vec<T>> for Component<Arena, T> {
     fn from(values: Vec<T>) -> Self {
         Component {
             values: values.into(),
-            marker: PhantomData,
         }
     }
 }
@@ -41,17 +37,17 @@ impl<Arena, T> From<Vec<T>> for Component<Arena, T> {
 impl<Arena, T> Component<Arena, T> {
     #[inline]
     pub fn insert<Id: ValidId<Arena = Arena>>(&mut self, id: Id, value: T) {
-        self.values.insert_with(id.id().untyped, value, || panic!());
+        self.values.insert(id.id(), value);
     }
 
     #[inline]
     pub fn get<Id: ValidId<Arena = Arena>>(&self, id: Id) -> Option<&T> {
-        self.values.get(id.id().untyped)
+        self.values.get(id.id())
     }
 
     #[inline]
     pub fn get_mut<Id: ValidId<Arena = Arena>>(&mut self, id: Id) -> Option<&mut T> {
-        self.values.get_mut(id.id().untyped)
+        self.values.get_mut(id.id())
     }
 
     #[inline]
@@ -60,7 +56,7 @@ impl<Arena, T> Component<Arena, T> {
         IdA: ValidId<Arena = Arena>,
         IdB: ValidId<Arena = Arena>,
     {
-        self.values.swap(a.id().untyped, b.id().untyped);
+        self.values.swap(a.id(), b.id());
     }
 
     #[inline]
@@ -70,12 +66,12 @@ impl<Arena, T> Component<Arena, T> {
 
     #[inline]
     pub fn iter(&self) -> Iter<Arena, T> {
-        Iter::new(&self.values)
+        self.values.iter()
     }
 
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<Arena, T> {
-        IterMut::new(&mut self.values)
+        self.values.iter_mut()
     }
 
     #[inline]
@@ -92,7 +88,7 @@ impl<Arena, T> Component<Arena, T> {
 impl<Arena, T> Component<Arena, Option<T>> {
     #[inline]
     pub fn remove<Id: ValidId<Arena = Arena>>(&mut self, id: Id) -> Option<T> {
-        let value = self.values.get_mut(id.id().untyped)?;
+        let value = self.values.get_mut(id.id())?;
         std::mem::take(value)
     }
 }
@@ -114,14 +110,14 @@ impl<Arena, T, V: ValidId<Arena = Arena>> Index<V> for Component<Arena, T> {
 
     #[inline]
     fn index(&self, index: V) -> &Self::Output {
-        self.values.index(index.id().untyped)
+        self.values.index(index.id())
     }
 }
 
 impl<Arena, T, V: ValidId<Arena = Arena>> IndexMut<V> for Component<Arena, T> {
     #[inline]
     fn index_mut(&mut self, index: V) -> &mut Self::Output {
-        self.values.index_mut(index.id().untyped)
+        self.values.index_mut(index.id())
     }
 }
 
@@ -131,7 +127,7 @@ impl<'a, Arena, T> IntoIterator for &'a Component<Arena, T> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        self.values.iter()
+        self.values.iter().into_iter()
     }
 }
 
@@ -141,7 +137,7 @@ impl<'a, Arena, T> IntoIterator for &'a mut Component<Arena, T> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        self.values.iter_mut()
+        self.values.iter_mut().into_iter()
     }
 }
 
