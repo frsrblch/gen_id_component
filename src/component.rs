@@ -335,7 +335,10 @@ mod test {
 
         target.assign((&primes + &ints) * &primes);
 
-        assert_eq!(Vec::from(target.values), vec![6, 15, 40]);
+        assert_eq!(
+            target.into_iter().copied().collect::<Vec<_>>(),
+            vec![6, 15, 40]
+        );
     }
 
     #[test]
