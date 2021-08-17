@@ -37,7 +37,17 @@ impl<Arena, T> From<Vec<T>> for Component<Arena, T> {
 impl<Arena, T> Component<Arena, T> {
     #[inline]
     pub fn insert<Id: ValidId<Arena = Arena>>(&mut self, id: Id, value: T) {
-        self.values.insert(id.id(), value);
+        self.insert_with(id, value, || panic!("Invalid index"));
+    }
+
+    #[inline]
+    pub fn insert_with<Id: ValidId<Arena = Arena>, F: Fn() -> T>(
+        &mut self,
+        id: Id,
+        value: T,
+        f: F,
+    ) {
+        self.values.insert_with(id.id(), value, f);
     }
 
     #[inline]

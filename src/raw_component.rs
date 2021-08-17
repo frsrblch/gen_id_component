@@ -41,7 +41,12 @@ impl<Arena, T> From<Vec<T>> for RawComponent<Arena, T> {
 impl<Arena, T> RawComponent<Arena, T> {
     #[inline]
     pub fn insert(&mut self, id: Id<Arena>, value: T) {
-        self.values.insert_with(id.untyped, value, || panic!());
+        self.insert_with(id, value, || panic!());
+    }
+
+    #[inline]
+    pub fn insert_with<F: Fn() -> T>(&mut self, id: Id<Arena>, value: T, f: F) {
+        self.values.insert_with(id.untyped, value, f);
     }
 
     #[inline]
