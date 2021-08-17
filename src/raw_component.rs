@@ -121,6 +121,22 @@ impl<Arena, T> IndexMut<Id<Arena>> for RawComponent<Arena, T> {
     }
 }
 
+impl<Arena, T> Index<&Id<Arena>> for RawComponent<Arena, T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: &Id<Arena>) -> &Self::Output {
+        self.values.index(index.untyped)
+    }
+}
+
+impl<Arena, T> IndexMut<&Id<Arena>> for RawComponent<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: &Id<Arena>) -> &mut Self::Output {
+        self.values.index_mut(index.untyped)
+    }
+}
+
 impl<'a, Arena, T> IntoIterator for &'a RawComponent<Arena, T> {
     type Item = &'a T;
     type IntoIter = std::slice::Iter<'a, T>;
