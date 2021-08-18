@@ -1,6 +1,6 @@
 use crate::raw_component::RawComponent;
 use force_derive::ForceDefault;
-use gen_id_allocator::ValidId;
+use gen_id_allocator::{Fixed, Id, IdRange, Valid, ValidId};
 use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
 use ref_cast::RefCast;
 use std::ops::{Index, IndexMut, Neg, Not};
@@ -115,19 +115,131 @@ impl<'a, Arena, T: Copy + 'a> Component<Arena, T> {
     }
 }
 
-impl<Arena, T, V: ValidId<Arena = Arena>> Index<V> for Component<Arena, T> {
+impl<'valid, Arena, T> Index<Valid<'valid, Id<Arena>>> for Component<Arena, T> {
     type Output = T;
 
     #[inline]
-    fn index(&self, index: V) -> &Self::Output {
+    fn index(&self, index: Valid<Id<Arena>>) -> &Self::Output {
         self.values.index(index.id())
     }
 }
 
-impl<Arena, T, V: ValidId<Arena = Arena>> IndexMut<V> for Component<Arena, T> {
+impl<'valid, Arena, T> IndexMut<Valid<'valid, Id<Arena>>> for Component<Arena, T> {
     #[inline]
-    fn index_mut(&mut self, index: V) -> &mut Self::Output {
+    fn index_mut(&mut self, index: Valid<Id<Arena>>) -> &mut Self::Output {
         self.values.index_mut(index.id())
+    }
+}
+
+impl<'valid, Arena, T> Index<Valid<'valid, &Id<Arena>>> for Component<Arena, T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: Valid<&Id<Arena>>) -> &Self::Output {
+        self.values.index(index.id())
+    }
+}
+
+impl<'valid, Arena, T> IndexMut<Valid<'valid, &Id<Arena>>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: Valid<&Id<Arena>>) -> &mut Self::Output {
+        self.values.index_mut(index.id())
+    }
+}
+
+impl<Arena: Fixed, T> Index<Id<Arena>> for Component<Arena, T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: Id<Arena>) -> &Self::Output {
+        self.values.index(index)
+    }
+}
+
+impl<Arena: Fixed, T> IndexMut<Id<Arena>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: Id<Arena>) -> &mut Self::Output {
+        self.values.index_mut(index)
+    }
+}
+
+impl<Arena: Fixed, T> Index<&Id<Arena>> for Component<Arena, T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: &Id<Arena>) -> &Self::Output {
+        self.values.index(index)
+    }
+}
+
+impl<Arena: Fixed, T> IndexMut<&Id<Arena>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: &Id<Arena>) -> &mut Self::Output {
+        self.values.index_mut(index)
+    }
+}
+
+impl<Arena: Fixed, T> Index<IdRange<Arena>> for Component<Arena, T> {
+    type Output = [T];
+
+    #[inline]
+    fn index(&self, index: IdRange<Arena>) -> &Self::Output {
+        self.values.index(index)
+    }
+}
+
+impl<Arena: Fixed, T> IndexMut<IdRange<Arena>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: IdRange<Arena>) -> &mut Self::Output {
+        self.values.index_mut(index)
+    }
+}
+
+impl<Arena: Fixed, T> Index<&IdRange<Arena>> for Component<Arena, T> {
+    type Output = [T];
+
+    #[inline]
+    fn index(&self, index: &IdRange<Arena>) -> &Self::Output {
+        self.values.index(*index)
+    }
+}
+
+impl<Arena: Fixed, T> IndexMut<&IdRange<Arena>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: &IdRange<Arena>) -> &mut Self::Output {
+        self.values.index_mut(*index)
+    }
+}
+
+impl<'valid, Arena, T> Index<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
+    type Output = [T];
+
+    #[inline]
+    fn index(&self, index: Valid<'valid, IdRange<Arena>>) -> &Self::Output {
+        self.values.index(index.value)
+    }
+}
+
+impl<'valid, Arena, T> IndexMut<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: Valid<'valid, IdRange<Arena>>) -> &mut Self::Output {
+        self.values.index_mut(index.value)
+    }
+}
+
+impl<'valid, Arena, T> Index<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
+    type Output = [T];
+
+    #[inline]
+    fn index(&self, index: Valid<'valid, &IdRange<Arena>>) -> &Self::Output {
+        self.values.index(*index.value)
+    }
+}
+
+impl<'valid, Arena, T> IndexMut<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
+    #[inline]
+    fn index_mut(&mut self, index: Valid<'valid, &IdRange<Arena>>) -> &mut Self::Output {
+        self.values.index_mut(*index.value)
     }
 }
 

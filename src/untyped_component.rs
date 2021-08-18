@@ -1,5 +1,5 @@
 use crate::index_vec::IndexVec;
-use gen_id_allocator::UntypedId;
+use gen_id_allocator::{UntypedId, UntypedIdRange};
 use ref_cast::RefCast;
 use std::ops::{Index, IndexMut};
 
@@ -151,5 +151,19 @@ impl<T> IndexMut<&UntypedId> for UntypedComponent<T> {
     #[inline]
     fn index_mut(&mut self, index: &UntypedId) -> &mut Self::Output {
         self.values.index_mut(index.index())
+    }
+}
+
+impl<T> Index<UntypedIdRange> for UntypedComponent<T> {
+    type Output = [T];
+
+    fn index(&self, index: UntypedIdRange) -> &Self::Output {
+        self.values.index(index.range())
+    }
+}
+
+impl<T> IndexMut<UntypedIdRange> for UntypedComponent<T> {
+    fn index_mut(&mut self, index: UntypedIdRange) -> &mut Self::Output {
+        self.values.index_mut(index.range())
     }
 }

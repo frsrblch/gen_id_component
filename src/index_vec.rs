@@ -1,5 +1,6 @@
 use force_derive::ForceDefault;
 use ref_cast::RefCast;
+use std::ops::Range;
 use std::ops::{Index, IndexMut};
 
 #[repr(transparent)]
@@ -102,6 +103,21 @@ impl<T> Index<usize> for IndexVec<T> {
 impl<T> IndexMut<usize> for IndexVec<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.values.index_mut(index)
+    }
+}
+
+impl<T> Index<Range<usize>> for IndexVec<T> {
+    type Output = [T];
+
+    #[inline]
+    fn index(&self, index: Range<usize>) -> &Self::Output {
+        self.values.index(index)
+    }
+}
+
+impl<T> IndexMut<Range<usize>> for IndexVec<T> {
+    fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
         self.values.index_mut(index)
     }
 }

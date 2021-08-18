@@ -1,6 +1,6 @@
 use crate::untyped_component::UntypedComponent;
 use force_derive::ForceDefault;
-use gen_id_allocator::Id;
+use gen_id_allocator::{Id, IdRange};
 use iter_context::{ContextualIterator, FromContextualIterator, Iter, IterMut};
 use ref_cast::RefCast;
 use std::marker::PhantomData;
@@ -139,6 +139,20 @@ impl<Arena, T> IndexMut<&Id<Arena>> for RawComponent<Arena, T> {
     #[inline]
     fn index_mut(&mut self, index: &Id<Arena>) -> &mut Self::Output {
         self.values.index_mut(index.untyped)
+    }
+}
+
+impl<Arena, T> Index<IdRange<Arena>> for RawComponent<Arena, T> {
+    type Output = [T];
+
+    fn index(&self, index: IdRange<Arena>) -> &Self::Output {
+        self.values.index(index.range())
+    }
+}
+
+impl<Arena, T> IndexMut<IdRange<Arena>> for RawComponent<Arena, T> {
+    fn index_mut(&mut self, index: IdRange<Arena>) -> &mut Self::Output {
+        self.values.index_mut(index.range())
     }
 }
 
