@@ -211,7 +211,7 @@ impl<Arena: Fixed, T> IndexMut<&IdRange<Arena>> for Component<Arena, T> {
     }
 }
 
-impl<'valid, Arena, T> Index<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
+impl<'valid, Arena: Fixed, T> Index<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
     type Output = [T];
 
     #[inline]
@@ -220,14 +220,14 @@ impl<'valid, Arena, T> Index<Valid<'valid, IdRange<Arena>>> for Component<Arena,
     }
 }
 
-impl<'valid, Arena, T> IndexMut<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
+impl<'valid, Arena: Fixed, T> IndexMut<Valid<'valid, IdRange<Arena>>> for Component<Arena, T> {
     #[inline]
     fn index_mut(&mut self, index: Valid<'valid, IdRange<Arena>>) -> &mut Self::Output {
         self.values.index_mut(index.value)
     }
 }
 
-impl<'valid, Arena, T> Index<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
+impl<'valid, Arena: Fixed, T> Index<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
     type Output = [T];
 
     #[inline]
@@ -236,7 +236,7 @@ impl<'valid, Arena, T> Index<Valid<'valid, &IdRange<Arena>>> for Component<Arena
     }
 }
 
-impl<'valid, Arena, T> IndexMut<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
+impl<'valid, Arena: Fixed, T> IndexMut<Valid<'valid, &IdRange<Arena>>> for Component<Arena, T> {
     #[inline]
     fn index_mut(&mut self, index: Valid<'valid, &IdRange<Arena>>) -> &mut Self::Output {
         self.values.index_mut(*index.value)
