@@ -1,5 +1,5 @@
 use crate::index_vec::IndexVec;
-use gen_id_allocator::{UntypedId, UntypedIdRange};
+use gen_id_allocator::untyped::{UntypedId, UntypedIdRange};
 use ref_cast::RefCast;
 use std::ops::{Index, IndexMut};
 
