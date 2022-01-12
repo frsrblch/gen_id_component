@@ -353,11 +353,14 @@ impl_op!(BitAnd, bitand);
 impl_op!(BitOr, bitor);
 impl_op!(BitXor, bitxor);
 
+type MapNot<'a, Arena, T> =
+    iter_context::Map<Arena, &'a Component<Arena, T>, fn(&'a T) -> <&'a T as Not>::Output>;
+
 impl<'a, Arena, T> Not for &'a Component<Arena, T>
 where
     &'a T: Not,
 {
-    type Output = iter_context::Map<Arena, Self, fn(&'a T) -> <&'a T as Not>::Output>;
+    type Output = MapNot<'a, Arena, T>;
 
     #[inline]
     fn not(self) -> Self::Output {
@@ -365,11 +368,14 @@ where
     }
 }
 
+type MapNeg<'a, Arena, T> =
+    iter_context::Map<Arena, &'a Component<Arena, T>, fn(&'a T) -> <&'a T as Neg>::Output>;
+
 impl<'a, Arena, T> Neg for &'a Component<Arena, T>
 where
     &'a T: Neg,
 {
-    type Output = iter_context::Map<Arena, Self, fn(&'a T) -> <&'a T as Neg>::Output>;
+    type Output = MapNeg<'a, Arena, T>;
 
     #[inline]
     fn neg(self) -> Self::Output {
